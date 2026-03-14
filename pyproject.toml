@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "laguku-sdk"
+version = "0.1.0"
+description = "Production-grade asynchronous music downloader SDK replicated from Go SFD"
+authors = ["Laguku SDK Team"]
+packages = [{include = "laguku_sdk", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+aiohttp = "^3.9.1"
+mutagen = "^1.47.0"
+tenacity = "^8.2.3"
+ffmpeg-python = "^0.2.0"
+python-slugify = "^8.0.1"
+rich = "^13.7.0"
+loguru = "^0.7.2"
+python-dotenv = "^1.0.0"
+pyotp = "^2.9.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
