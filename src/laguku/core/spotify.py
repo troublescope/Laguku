@@ -5,7 +5,7 @@ import re
 import pyotp
 import time
 from typing import Optional, Dict, Any, List, Tuple
-from laguku_sdk.models import TrackMetadata
+from laguku.models import TrackMetadata
 from loguru import logger
 
 class SpotifyInternal:

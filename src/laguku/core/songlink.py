@@ -1,6 +1,6 @@
 import aiohttp
 from typing import Optional
-from laguku_sdk.exceptions import ProviderError
+from laguku.exceptions import ProviderError
 
 class SongLinkResolver:
     def __init__(self, session: aiohttp.ClientSession):

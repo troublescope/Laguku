@@ -1,11 +1,7 @@
 import asyncio
 import os
-import sys
 
-# Add src to path
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
-
-from laguku_sdk import LagukuClient, LagukuConfig
+from laguku import LagukuClient, LagukuConfig
 
 async def main():
     # Test with a track name containing special characters

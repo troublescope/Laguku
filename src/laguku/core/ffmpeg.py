@@ -2,7 +2,7 @@ import asyncio
 import os
 import ffmpeg
 from loguru import logger
-from laguku_sdk.exceptions import DownloadError, DecryptionError
+from laguku.exceptions import DownloadError, DecryptionError
 
 class FFmpegProcessor:
     @staticmethod

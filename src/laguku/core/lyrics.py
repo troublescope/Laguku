@@ -1,7 +1,7 @@
 import aiohttp
 import re
 from typing import Optional
-from laguku_sdk.models import Lyrics
+from laguku.models import Lyrics
 from loguru import logger
 
 class LyricsResolver:

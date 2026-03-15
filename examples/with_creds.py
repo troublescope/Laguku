@@ -1,12 +1,8 @@
 import asyncio
 import os
-import sys
 from dotenv import load_dotenv
 
-# Add src to path
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
-
-from laguku_sdk import LagukuClient
+from laguku import LagukuClient
 
 # Load credentials from .env file if it exists
 load_dotenv()

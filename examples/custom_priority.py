@@ -1,11 +1,6 @@
 import asyncio
-import os
-import sys
 
-# Add src to path
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
-
-from laguku_sdk import LagukuClient, LagukuConfig, ProviderType
+from laguku import LagukuClient, LagukuConfig, ProviderType
 
 async def main():
     # Configure SDK to prefer TIDAL, then AMAZON, then QOBUZ

@@ -2,7 +2,7 @@ from typing import Optional
 from mutagen.id3 import ID3, TIT2, TPE1, TALB, TRCK, TDRC, TCON, USLT, APIC, TXXX
 from mutagen.flac import FLAC, Picture
 from mutagen.mp4 import MP4, MP4Cover
-from laguku_sdk.models import TrackMetadata
+from laguku.models import TrackMetadata
 from loguru import logger
 
 class MetadataTagger:

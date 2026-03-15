@@ -1,38 +1,25 @@
 import asyncio
-import os
-import sys
 
-# Add src to path
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
+from laguku import Laguku, AsyncLaguku, ProviderType
 
-from laguku_sdk import LagukuClient, ProviderType
+async def main_async():
+    print("\n--- Testing Async SDK ---")
+    # Async usage with context manager
+    async with AsyncLaguku(quality="lossless", provider=ProviderType.QOBUZ) as sdk:
+        query = "https://open.spotify.com/track/2dIBMHByUGcNPzmYBJ6OAj"
+        song = await sdk.download(query)
+        print(f"Async Download: {song.title} from {song.provider}")
 
-async def main():
-    # Hindia - Evaluasi
-    query = "https://open.spotify.com/track/2dIBMHByUGcNPzmYBJ6OAj"
-    
-    # Demonstration 1: Default (Qobuz preference) - FLAC
-    print("\n--- Test 1: High Quality FLAC (Qobuz Preference) ---")
-    async with LagukuClient() as client:
-        try:
-            song = await client.download(query=query, output_format="flac")
-            print(f"Provider: {song.provider}")
-            print(f"Format: {song.file_path.split('.')[-1].upper()}")
-            print(f"Path: {song.file_path}")
-        except Exception as e:
-            print(f"Test 1 failed: {e}")
-
-    # Demonstration 2: Fallback Logic (Force Amazon) - MP3
-    print("\n--- Test 2: Fallback Demonstration (Force Amazon) ---")
-    # We pass only Amazon to simulate Qobuz/Tidal being unavailable or skipped
-    async with LagukuClient(preferred_providers=[ProviderType.AMAZON]) as client:
-        try:
-            song = await client.download(query=query, output_format="mp3")
-            print(f"Provider: {song.provider}")
-            print(f"Format: {song.file_path.split('.')[-1].upper()}")
-            print(f"Path: {song.file_path}")
-        except Exception as e:
-            print(f"Test 2 failed: {e}")
+def main_sync():
+    print("\n--- Testing Sync SDK ---")
+    # Sync usage with context manager
+    with Laguku(quality="320", provider=ProviderType.AMAZON) as sdk:
+        query = "https://open.spotify.com/track/2dIBMHByUGcNPzmYBJ6OAj"
+        song = sdk.download(query)
+        print(f"Sync Download: {song.title} from {song.provider}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Test Sync first
+    main_sync()
+    # Then Test Async
+    asyncio.run(main_async())

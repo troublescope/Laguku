@@ -1,8 +1,10 @@
-from typing import List
-from laguku_sdk.providers.base import BaseProvider
-from laguku_sdk.models import ProviderType, TrackMetadata, StreamInfo
-from laguku_sdk.exceptions import ResolutionError
+from typing import Optional
+from laguku.providers.base import BaseProvider
+from laguku.providers.registry import ProviderRegistry
+from laguku.config import ProviderType
+from laguku.models import TrackMetadata, StreamInfo
 
+@ProviderRegistry.register(ProviderType.QOBUZ)
 class QobuzProvider(BaseProvider):
     APP_ID = "798273057"
     APIS = [
@@ -10,48 +12,43 @@ class QobuzProvider(BaseProvider):
         "https://qbz.afkarxyz.fun/api/track/"
     ]
 
-    @property
-    def type(self) -> ProviderType:
-        return ProviderType.QOBUZ
-
-    async def resolve_stream(self, metadata: TrackMetadata, target_format: str = "flac") -> StreamInfo:
+    async def resolve_stream(self, metadata: TrackMetadata, target_format: str = "auto") -> Optional[StreamInfo]:
         qobuz_id = None
-        # Map format to Qobuz quality (5 = 320kbps MP3, 6 = Lossless FLAC)
-        # m4a is treated as lossless (ALAC)
-        is_lossless = target_format.lower() in ["flac", "m4a"]
+        
+        is_lossless = (target_format == "auto" and self.config.quality == "lossless") or target_format in ["flac", "m4a"]
         quality = "6" if is_lossless else "5"
         stream_format = "flac" if is_lossless else "mp3"
         bitrate = 1411 if is_lossless else 320
 
+        # Try to find Qobuz ID via ISRC
         if metadata.isrc:
             search_url = f"https://www.qobuz.com/api.json/0.2/track/search?query={metadata.isrc}&limit=1&app_id={self.APP_ID}"
             async with self.session.get(search_url) as resp:
-                data = await resp.json()
-                items = data.get("tracks", {}).get("items", [])
-                if items:
-                    qobuz_id = items[0]['id']
+                if resp.status == 200:
+                    data = await resp.json()
+                    items = data.get("tracks", {}).get("items", [])
+                    if items:
+                        qobuz_id = items[0]['id']
         
         if not qobuz_id:
             # Search fallback by Title and Artist
             query = f"{metadata.artist} {metadata.title}"
             search_url = f"https://www.qobuz.com/api.json/0.2/track/search?query={query}&limit=1&app_id={self.APP_ID}"
             async with self.session.get(search_url) as resp:
-                data = await resp.json()
-                items = data.get("tracks", {}).get("items", [])
-                if items:
-                    qobuz_id = items[0]['id']
+                if resp.status == 200:
+                    data = await resp.json()
+                    items = data.get("tracks", {}).get("items", [])
+                    if items:
+                        qobuz_id = items[0]['id']
 
         if not qobuz_id:
-            raise ResolutionError("Track not found on Qobuz via ISRC or Search")
+            return None
 
         for api in self.APIS:
             try:
-                # Handle different API URL structures
                 final_api_url = f"{api}{qobuz_id}"
-                if "?" in api:
-                    final_api_url += f"&quality={quality}"
-                else:
-                    final_api_url += f"?quality={quality}"
+                final_api_url += "&" if "?" in final_api_url else "?"
+                final_api_url += f"quality={quality}"
 
                 async with self.session.get(final_api_url) as resp:
                     if resp.status == 200:
@@ -59,4 +56,4 @@ class QobuzProvider(BaseProvider):
                         return StreamInfo(url=s_data['url'], bitrate=bitrate, format=stream_format)
             except Exception:
                 continue
-        raise ResolutionError("All Qobuz APIs failed")
+        return None

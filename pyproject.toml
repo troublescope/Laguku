@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "laguku-sdk"
 version = "0.1.0"
-description = "Production-grade asynchronous music downloader SDK replicated from Go SFD"
+description = "Production-grade asynchronous music downloader SDK"
 authors = ["Laguku SDK Team"]
-packages = [{include = "laguku_sdk", from = "src"}]
+packages = [{include = "laguku", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -16,6 +16,7 @@ rich = "^13.7.0"
 loguru = "^0.7.2"
 python-dotenv = "^1.0.0"
 pyotp = "^2.9.0"
+nest-asyncio = "^1.6.0"
 
 [build-system]
 requires = ["poetry-core"]
