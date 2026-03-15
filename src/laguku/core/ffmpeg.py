@@ -15,7 +15,7 @@ class FFmpegProcessor:
                 .overwrite_output()
                 .run_async(pipe_stderr=True)
             )
-            _, stderr = process.communicate()
+            _, stderr = await asyncio.to_thread(process.communicate)
             if process.returncode != 0:
                 raise DownloadError(f"FFmpeg failed: {stderr.decode()}")
         except Exception as e:
@@ -44,7 +44,7 @@ class FFmpegProcessor:
                 .overwrite_output()
                 .run_async(pipe_stderr=True)
             )
-            _, stderr = process.communicate()
+            _, stderr = await asyncio.to_thread(process.communicate)
             if process.returncode != 0:
                 raise DecryptionError(f"Decryption failed: {stderr.decode()}")
         except Exception as e:
@@ -61,7 +61,7 @@ class FFmpegProcessor:
                 .overwrite_output()
                 .run_async(pipe_stderr=True)
             )
-            _, stderr = process.communicate()
+            _, stderr = await asyncio.to_thread(process.communicate)
             if process.returncode != 0:
                 raise DownloadError(f"FFmpeg failed: {stderr.decode()}")
         except Exception as e:
@@ -79,7 +79,7 @@ class FFmpegProcessor:
                 .overwrite_output()
                 .run_async(pipe_stderr=True)
             )
-            _, stderr = process.communicate()
+            _, stderr = await asyncio.to_thread(process.communicate)
             if process.returncode != 0:
                 raise DownloadError(f"FFmpeg failed: {stderr.decode()}")
         except Exception as e:

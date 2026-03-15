@@ -2,7 +2,7 @@ from laguku import Laguku
 
 def main():
     # 1. Initialize with global config
-    sdk = Laguku(quality="320", provider="spotify")
+    sdk = Laguku(quality="320", provider="auto")
     
     try:
         # Test Search-based Download

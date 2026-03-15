@@ -35,6 +35,15 @@ class AsyncLaguku:
             self.session = aiohttp.ClientSession()
         return self.session
 
+    async def search(self, query: str, limit: int = 10, **overrides) -> List[Dict[str, Any]]:
+        """
+        Search for tracks on Spotify.
+        """
+        config = self.config.merge(**overrides)
+        session = await self._get_session()
+        mp = MetadataProcessor(session, config)
+        return await mp._spotify.search(query, limit=limit)
+
     async def download(self, query: str, **overrides) -> Song:
         """
         Download a single track asynchronously.
