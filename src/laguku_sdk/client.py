@@ -18,6 +18,12 @@ from laguku_sdk.providers.qobuz import QobuzProvider
 from laguku_sdk.exceptions import LagukuError
 
 class LagukuClient:
+    """
+    The main entry point for the Laguku SDK.
+    
+    Orchestrates the entire music downloading pipeline, including metadata enrichment,
+    stream resolution from multiple providers, downloading, and audio processing.
+    """
     def __init__(
         self, 
         preferred_providers: List[ProviderType] = None,
@@ -25,6 +31,15 @@ class LagukuClient:
         spotify_client_secret: Optional[str] = None,
         config: Optional[LagukuConfig] = None
     ):
+        """
+        Initialize the LagukuClient.
+
+        Args:
+            preferred_providers: A list of ProviderType enums in order of preference.
+            spotify_client_id: Optional Spotify API client ID for higher rate limits and search.
+            spotify_client_secret: Optional Spotify API client secret.
+            config: An optional LagukuConfig object for global settings.
+        """
         self.config = config or LagukuConfig()
         self.preferred_providers = preferred_providers or self.config.preferred_providers or [
             ProviderType.QOBUZ,
@@ -40,25 +55,30 @@ class LagukuClient:
         self._lyrics: Optional[LyricsResolver] = None
 
     def _get_spotify(self) -> SpotifyInternal:
+        """Internal: Initialize and return the Spotify internal handler."""
         if not self._spotify:
             self._spotify = SpotifyInternal(self.session, **self.spotify_creds)
         return self._spotify
 
     def _get_songlink(self) -> SongLinkResolver:
+        """Internal: Initialize and return the SongLink resolver."""
         if not self._songlink:
             self._songlink = SongLinkResolver(self.session)
         return self._songlink
 
     def _get_lyrics(self) -> LyricsResolver:
+        """Internal: Initialize and return the lyrics resolver."""
         if not self._lyrics:
             self._lyrics = LyricsResolver(self.session)
         return self._lyrics
 
     async def __aenter__(self):
+        """Async context manager entry: initializes the aiohttp session."""
         self.session = aiohttp.ClientSession()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit: closes the aiohttp session."""
         if self.session:
             await self.session.close()
 
@@ -69,6 +89,18 @@ class LagukuClient:
         output_format: Optional[str] = None,
         concurrency: Optional[int] = None
     ) -> List[Song]:
+        """
+        Download all tracks from a Spotify playlist.
+
+        Args:
+            playlist_query: Spotify playlist URL or ID.
+            output_dir: Directory where the playlist will be saved.
+            output_format: Target audio format (e.g., 'flac', 'mp3', 'auto').
+            concurrency: Number of parallel downloads.
+
+        Returns:
+            A list of Song objects for successfully downloaded tracks.
+        """
         if not self.session: self.session = aiohttp.ClientSession()
         spotify = self._get_spotify()
         playlist_id = playlist_query.split("/playlist/")[-1].split("?")[0] if "spotify.com" in playlist_query else playlist_query
@@ -89,6 +121,18 @@ class LagukuClient:
         output_format: Optional[str] = None,
         concurrency: Optional[int] = None
     ) -> List[Song]:
+        """
+        Download all tracks from a Spotify album.
+
+        Args:
+            album_query: Spotify album URL or ID.
+            output_dir: Directory where the album will be saved.
+            output_format: Target audio format.
+            concurrency: Number of parallel downloads.
+
+        Returns:
+            A list of Song objects.
+        """
         if not self.session: self.session = aiohttp.ClientSession()
         spotify = self._get_spotify()
         album_id = album_query.split("/album/")[-1].split("?")[0] if "spotify.com" in album_query else album_query
@@ -109,6 +153,18 @@ class LagukuClient:
         output_format: Optional[str] = None,
         concurrency: Optional[int] = None
     ) -> List[Song]:
+        """
+        Download top tracks from a Spotify artist.
+
+        Args:
+            artist_query: Spotify artist URL or ID.
+            output_dir: Directory where tracks will be saved.
+            output_format: Target audio format.
+            concurrency: Number of parallel downloads.
+
+        Returns:
+            A list of Song objects.
+        """
         if not self.session: self.session = aiohttp.ClientSession()
         spotify = self._get_spotify()
         artist_id = artist_query.split("/artist/")[-1].split("?")[0] if "spotify.com" in artist_query else artist_query
@@ -123,6 +179,7 @@ class LagukuClient:
         )
 
     async def _download_collection(self, track_ids: List[str], output_dir: str, output_format: str, concurrency: int) -> List[Song]:
+        """Internal: Download a list of tracks with concurrency control."""
         logger.info(f"Downloading {len(track_ids)} tracks to {output_dir}")
         os.makedirs(output_dir, exist_ok=True)
         
@@ -140,6 +197,17 @@ class LagukuClient:
         return [s for s in results if s is not None]
 
     async def download(self, query: str, output_dir: str = "downloads", output_format: Optional[str] = None) -> Song:
+        """
+        Download a single track based on a query or Spotify URL.
+
+        Args:
+            query: Spotify track URL, ID, or a search query string.
+            output_dir: Directory to save the file.
+            output_format: Target format (e.g., 'flac', 'mp3', 'm4a', 'auto').
+
+        Returns:
+            A Song object containing details about the downloaded file.
+        """
         if not self.session:
             self.session = aiohttp.ClientSession()
 
